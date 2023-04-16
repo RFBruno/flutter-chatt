@@ -1,13 +1,9 @@
-import 'dart:developer';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_chat/models/auth_form_data.dart';
 
 class AuthForm extends StatefulWidget {
-  const AuthForm({super.key});
+  final void Function(AuthFormData) onSubmit;
+  const AuthForm({super.key, required this.onSubmit});
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -18,7 +14,11 @@ class _AuthFormState extends State<AuthForm> {
   final _formData = AuthFormData();
 
   void _submit() {
-    _formKey.currentState?.validate();
+    final isValid = _formKey.currentState?.validate() ?? false;
+    
+    if(!isValid)return;
+
+    widget.onSubmit(_formData);
   }
 
   @override
@@ -33,16 +33,46 @@ class _AuthFormState extends State<AuthForm> {
               children: [
                 if(_formData.isSignup)
                 TextFormField(
+                  key: const ValueKey('name'),
+                  initialValue: _formData.name,
+                  onChanged: (value) => _formData.name = value,
+                  validator: (value) {
+                    final name = value ?? '';
+                    if (name.trim().length < 5) {
+                      return 'Nome deve ter no minimo 5 caracteres';
+                    }
+                    return null;
+                  },
                   decoration: const InputDecoration(
                     labelText: 'Nome',
                   ),
                 ),
                 TextFormField(
+                  key: const ValueKey('email'),
+                  initialValue: _formData.email,
+                  onChanged: (value) => _formData.email = value,
+                  validator: (value) {
+                    final email = value ?? '';
+                    if (!email.contains('@')) {
+                      return 'O email informado não é valido';
+                    }
+                    return null;
+                  },
                   decoration: const InputDecoration(
                     labelText: 'E-mail',
                   ),
                 ),
                 TextFormField(
+                  key: const ValueKey('password'),
+                  initialValue: _formData.password,
+                  onChanged: (value) => _formData.password = value,
+                  validator: (value) {
+                    final name = value ?? '';
+                    if (name.length < 6) {
+                      return 'Senha deve ter no minimo 6 caracteres';
+                    }
+                    return null;
+                  },
                   decoration: const InputDecoration(
                     labelText: 'Senha',
                   ),
@@ -53,7 +83,7 @@ class _AuthFormState extends State<AuthForm> {
                 ),
                 ElevatedButton(
                   onPressed: _submit,
-                  child: const Text('Entrar'),
+                  child: Text(_formData.isSignup ? 'Cadastrar' : 'Entrar'),
                 ),
                 TextButton(
                   onPressed: () {
