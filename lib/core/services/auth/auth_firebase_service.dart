@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_chat/core/models/chat_user.dart';
 import 'package:flutter_chat/core/services/auth/auth_services.dart';
@@ -30,23 +32,41 @@ class AuthFirebaseServices implements AuthServices {
 
   @override
   Future<void> signup(
-    String nome,
+    String name,
     String email,
     String password,
     File? image,
   ) async {
+    final signup = await Firebase.initializeApp(
+      name: 'userSignup',
+      options: Firebase.app().options,
+    );
+
+    final auth = FirebaseAuth.instanceFor(app: signup);
+
     UserCredential credential = await auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-    if (credential.user == null) return;
+    if (credential.user != null) {
+      // 1. Upload da foto do usuário
+      final imageName = '${credential.user!.uid}.jpg';
+      final imageUrl = await _uploadUserImage(image, imageName);
 
-    final imageName = '${credential.user!.uid}.jpg';
-    final imageURL = await _uploadUserImage(image, imageName);
+      // 2. atualizar os atributos do usuário
+      await credential.user?.updateDisplayName(name);
+      await credential.user?.updatePhotoURL(imageUrl);
 
-    credential.user?.updateDisplayName(nome);
-    credential.user?.updatePhotoURL(imageURL);
+      // 2.5 fazer o login do usuário
+      await login(email, password);
+
+      // 3. salvar usuário no banco de dados (opcional)
+      _currentUser = _toChatUser(credential.user!, name, imageUrl);
+      await _saveChatUser(_currentUser!);
+    }
+
+    await signup.delete();
   }
 
   @override
@@ -75,12 +95,23 @@ class AuthFirebaseServices implements AuthServices {
     _currentUser = user;
   }
 
-  static ChatUser _toChatUser(User user) {
+  Future<void> _saveChatUser(ChatUser user) async {
+    final store = FirebaseFirestore.instance;
+    final docRef = store.collection('users').doc(user.id);
+
+    return docRef.set({
+      'name': user.name,
+      'email': user.email,
+      'imageUrl': user.imageUrl,
+    });
+  }
+
+  static ChatUser _toChatUser(User user, [String? name, String? imageURL]) {
     return ChatUser(
       id: user.uid,
-      name: user.displayName ?? user.email!.split('@')[0],
+      name: name ?? user.displayName ?? user.email!.split('@')[0],
       email: user.email!,
-      imageUrl: user.photoURL ?? 'assets/images/avatar.png',
+      imageUrl: imageURL ?? user.photoURL ?? 'assets/images/avatar.png',
     );
   }
 }

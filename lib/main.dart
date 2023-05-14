@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/core/services/notification/chat_notification_service.dart';
 import 'package:flutter_chat/pages/auth_or_app_page.dart';
+import 'package:flutter_chat/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
-        theme: ThemeData.dark(),
+        theme: appTheme,
         home: const AuthOrAppPage(),
       ),
     );

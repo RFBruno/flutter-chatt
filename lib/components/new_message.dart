@@ -13,10 +13,10 @@ class _NewMessageState extends State<NewMessage> {
   String _message = '';
   final _messageController = TextEditingController();
 
-  Future<void> _sendMessage() async{
+  Future<void> _sendMessage() async {
     final user = AuthServices().currentUser;
 
-    if(user != null){
+    if (user != null) {
       await ChatService().save(_message, user);
       _messageController.clear();
     }
@@ -26,7 +26,7 @@ class _NewMessageState extends State<NewMessage> {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-         Expanded(
+        Expanded(
           child: TextField(
             controller: _messageController,
             onChanged: (msg) {
@@ -40,8 +40,7 @@ class _NewMessageState extends State<NewMessage> {
           ),
         ),
         IconButton(
-          onPressed: _message.trim().isEmpty ? null : _sendMessage
-          ,
+          onPressed: _message.trim().isEmpty ? null : _sendMessage,
           icon: const Icon(Icons.send),
         ),
       ],

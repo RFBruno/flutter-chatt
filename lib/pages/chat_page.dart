@@ -20,22 +20,26 @@ class ChatPage extends StatelessWidget {
         actions: [
           DropdownButtonHideUnderline(
             child: DropdownButton(
-              icon: Icon(
+              iconEnabledColor: Theme.of(context).colorScheme.onSurface,
+              icon: const Icon(
                 Icons.more_vert,
-                color: Theme.of(context).primaryIconTheme.color,
               ),
               items: [
                 DropdownMenuItem(
-                    value: 'logout',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.exit_to_app),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text('Sair')
-                      ],
-                    ))
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.exit_to_app,
+                        color: Theme.of(context).colorScheme.inverseSurface,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Text('Sair')
+                    ],
+                  ),
+                )
               ],
               onChanged: (value) {
                 if (value == 'logout') {
@@ -63,12 +67,12 @@ class ChatPage extends StatelessWidget {
                 right: 7,
                 child: CircleAvatar(
                   maxRadius: 10,
-                  backgroundColor: Colors.red.shade800,
+                  backgroundColor:const Color.fromARGB(255, 233, 88, 78),
                   child: Text(
                     Provider.of<ChatNotificationService>(context)
                         .itemsCount
                         .toString(),
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.inverseSurface),
                   ),
                 ),
               ),
@@ -89,8 +93,9 @@ class ChatPage extends StatelessWidget {
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     Provider.of<ChatNotificationService>(context, listen: false).add(
-      //       ChatNotification(title: 'Mais uma notificação!!', body: Random().nextDouble().toString())
-      //     );
+      //         ChatNotification(
+      //             title: 'Mais uma notificação!!',
+      //             body: Random().nextDouble().toString()));
       //   },
       //   child: const Icon(Icons.add),
       // ),
